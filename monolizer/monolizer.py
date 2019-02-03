@@ -83,7 +83,6 @@ class _SampleblockChannelInfo():
     def set_sample_from_sampleblock(self, sampleblock):
         if not self.sample:
             self._sample = self.get_valid_sample(sampleblock)
-            print(self._sample)
         return self.sample
 
     def set_sample(self):
@@ -99,13 +98,16 @@ class _SampleblockChannelInfo():
 
 class Monolizer():
     _file = None
+    blocksize = 1024
+    channel = None
+    channels = None
 
     def __init__(self, file=None):
         if file:
             self.file = file
 
     def __del__(self):
-        if file:
+        if self.file:
             self.file.close()
 
     @property
@@ -115,6 +117,8 @@ class Monolizer():
     @file.setter
     def file(self, file):
         self._file = sf(file)
+        self.channel = self
+        self.channels = self._file.channels
 
     @classmethod
     def EMPTY(cls):
@@ -157,10 +161,10 @@ class Monolizer():
                          sample=self.panning_sample,
                          eof=eof)
 
-    def monolize(self, blocksize=1024):
+    def monolize(self):
         if self.file:
             flag = correlated = sample = None
-            for sampleblock in self.file.blocks(blocksize=blocksize, always_2d=True):
+            for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
                 info = _SampleblockChannelInfo(sampleblock=sampleblock)
                 info.monolize()
                 flag = info.flag
