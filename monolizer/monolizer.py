@@ -1,4 +1,5 @@
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
 
 
@@ -91,7 +92,7 @@ class _SampleblockChannelInfo():
     def reset_sample(self):
         self._sample = []
 
-    def monolize(self):
+    def set_info(self):
         self.set_flag()
         self.set_sample()
         self.set_correlation()
@@ -161,12 +162,12 @@ class Monolizer():
                          sample=self.panning_sample,
                          eof=eof)
 
-    def monolize(self):
+    def chkMono(self):
         if self.file:
             flag = correlated = sample = None
             for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
                 info = _SampleblockChannelInfo(sampleblock=sampleblock)
-                info.monolize()
+                info.set_info()
                 flag = info.flag
                 correlated = info.isCorrelated()
                 sample = info.sample

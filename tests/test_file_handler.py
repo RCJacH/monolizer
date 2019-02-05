@@ -1,17 +1,15 @@
 import pytest
-# from monolizer import FileHandler
+from monolizer import FileHandler
 from monolizer.file_handler import _FileInfo
 
 
 class Test_FileInfo(object):
 
-    @classmethod
-    def setup_class(cls):
-        pass
-
-    @classmethod
-    def teardown_class(cls):
-        pass
+    def test_FileInfo__init__no_input(self):
+        obj = _FileInfo()
+        assert obj.file == None
+        assert obj.channel == None
+        del obj
 
     def test_init_sin(self):
         obj = _FileInfo(file='tests\\sin.wav')
@@ -76,15 +74,23 @@ class Test_FileInfo(object):
         assert obj.toMonolize() == True
         del obj
 
-# class Test_FileHandler(object):
 
-#     @classmethod
-#     def setup_class(cls):
-#         pass
+class Test_FileHandler(object):
+    import os
 
-#     @classmethod
-#     def teardown_class(cls):
-#         pass
+    def test_FileHandler__init__no_input(self):
+        obj = FileHandler()
+        assert obj.file == None
 
-#     def test_something(self):
-#         pass
+    def test_FileHandler__init__file(self):
+        obj = FileHandler('tests')
+        assert obj.file == None
+        obj = FileHandler('tests.wav')
+        assert obj.file == "tests.wav"
+        obj = FileHandler('tests.Wav')
+        assert obj.file == "tests.Wav"
+        obj = FileHandler('tests.WAV')
+        assert obj.file == "tests.WAV"
+        obj = FileHandler('tests.WAVE')
+        assert obj.file == "tests.WAVE"
+
