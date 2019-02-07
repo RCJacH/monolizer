@@ -2,13 +2,12 @@
 Tests for `monolizer` module.
 """
 import pytest
-from soundfile import SoundFile as sf
 from monolizer.monolizer import _SampleblockChannelInfo
 from monolizer import Monolizer
 
 class Test_SampleblockChannelInfo(object):
 
-    @pytest.fixture()
+    @pytest.fixture
     def obj(self):
         return _SampleblockChannelInfo()
 
@@ -83,13 +82,73 @@ class Test_SampleblockChannelInfo(object):
                                    [0.99996948, 0.99609375]
                                    ]) == [0.99996948, 0.99804688]
 
+    def test_is_sample_stereo(self, obj):
+        assert obj.is_sample_stereo([0.5, 0.3]) == True
+        assert obj.is_sample_stereo([0.5]) == False
+        assert obj.is_sample_stereo([0.5, 0.5]) == False
+        assert obj.is_sample_stereo([0, 0]) == False
+
+
+class AudioInfo:
+    def __init__(self, shape):
+        self.src = Monolizer()
+        self.src.file = "tests//" + shape + ".wav"
+        if shape == "sin":
+            self.channel = 0
+            self.channels = 1
+            self.isMono = True
+            self.toDelete = False
+            self.toMonolize = False
+        if shape == "sins":
+            self.channel = 0
+            self.channels = 2
+            self.isMono = True
+            self.toDelete = False
+            self.toMonolize = True
+        if shape == "empty":
+            self.channel = self.src.EMPTY
+            self.channels = 1
+            self.isMono = False
+            self.toDelete = True
+            self.toMonolize = False
+        if shape == "sin_tri":
+            self.channel = self.src.STEREO
+            self.channels = 2
+            self.isMono = False
+            self.toDelete = False
+            self.toMonolize = False
+        if shape == "sin_l50":
+            self.channel = 0
+            self.channels = 2
+            self.isMono = True
+            self.toDelete = False
+            self.toMonolize = True
+        if shape == "sin_r25":
+            self.channel = 1
+            self.channels = 2
+            self.isMono = True
+            self.toDelete = False
+            self.toMonolize = True
+        if shape == "sin_r100":
+            self.channel = 1
+            self.channels = 2
+            self.isMono = True
+            self.toDelete = False
+            self.toMonolize = True
+
+    def __del__(self):
+        del self.src
+
+@pytest.fixture(params=["sin", "sins", "empty", "sin_tri", "sin_l50", "sin_r25", "sin_r100"])
+def audioinfo(request):
+    info = AudioInfo(request.param)
+    yield info
+    del info
+
 class TestMonolizer(object):
 
-    @pytest.fixture()
-    def obj(self):
-        return Monolizer()
-
-    def test_identify(self, obj):
+    def test_identify(self):
+        obj = Monolizer()
         assert obj._identify(flag=0, eof=True) == obj.EMPTY
         assert obj._identify(flag=0, eof=False) == None
         assert obj._identify(flag=3, correlated=False) == obj.STEREO
@@ -104,20 +163,16 @@ class TestMonolizer(object):
         assert obj._identify(flag=3, eof=True, correlated=True, sample=[0.5, 0.2]) == 0
         with pytest.raises(Exception):
             obj._identify(flag=3, eof=True, correlated=True, sample=[])
-        pass
+        del obj
 
-    def test_chkMono(self):
-        obj = Monolizer(file='tests\\sin.wav')
-        assert obj.chkMono() == 0
-        obj = Monolizer(file='tests\\sins.wav')
-        assert obj.chkMono() == 0
-        obj = Monolizer(file='tests\\empty.wav')
-        assert obj.chkMono() == obj.EMPTY
-        obj = Monolizer(file='tests\\sin_tri.wav')
-        assert obj.chkMono() == obj.STEREO
-        obj = Monolizer(file='tests\\sin_l50.wav')
-        assert obj.chkMono() == 0
-        obj = Monolizer(file='tests\\sin_r25.wav')
-        assert obj.chkMono() == 1
-        obj = Monolizer(file='tests\\sin_r100.wav')
-        assert obj.chkMono() == 1
+    def test_chkMono(self, audioinfo):
+        assert audioinfo.src.channel == audioinfo.channel
+
+    def test_isMono(self, audioinfo):
+        assert audioinfo.src.isMono() == audioinfo.isMono
+
+    def test_toDelete(self, audioinfo):
+        assert audioinfo.src.toDelete() == audioinfo.toDelete
+
+    def test_toMonolize(self, audioinfo):
+        assert audioinfo.src.toMonolize() == audioinfo.toMonolize
