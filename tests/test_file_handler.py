@@ -20,3 +20,9 @@ class Test_FileHandler(object):
         obj = FileHandler('tests.WAVE')
         assert obj.file == "tests.WAVE"
 
+    def test_list_audio_files(self):
+        obj = FileHandler('tests')
+        print(obj._list_audio_files('tests'))
+        assert (set(obj._list_audio_files('tests')) == 
+                set(['empty.wav', 'sin.wav', 'sins.wav', 'sin_l50.wav',
+                'sin_r25.wav', 'sin_r100.wav', 'sin_tri.wav', 'sinwave.wave']))

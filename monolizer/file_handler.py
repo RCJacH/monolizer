@@ -34,9 +34,13 @@ class FileHandler():
     file = None
 
     def __init__(self, file=None):
-        if file and self._isAudioFile(file):
+        if file and self._is_audio_file(file):
             self.file = file
 
-    def _isAudioFile(self, file):
+    def _is_audio_file(self, file):
         _, file_extension = os.path.splitext(file)
         return file_extension.upper() in (name.upper() for name in extensions)
+
+    def _list_audio_files(self, folder):
+        return [f for f in os.listdir(folder) if self._is_audio_file(f)]
+
