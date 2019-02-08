@@ -176,3 +176,17 @@ class TestMonolizer(object):
 
     def test_toMonolize(self, audioinfo):
         assert audioinfo.src.toMonolize() == audioinfo.toMonolize
+
+    def test_writeMono(self):
+        import os
+        from soundfile import read
+        path = 'tests\\tmpdir\\'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        file = os.path.join(path, 'testee.wav')
+        with Monolizer(file='tests\\sins.wav') as obj:
+            obj.writeMono(file)
+        compare = read('tests\\sin.wav', always_2d=True)
+        result = read(file, always_2d=True)
+        assert (x == y for x in compare for y in result)
+        os.remove(file)

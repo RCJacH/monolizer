@@ -1,6 +1,7 @@
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
+from soundfile import write
 
 
 class _SampleblockChannelInfo():
@@ -101,17 +102,36 @@ class Monolizer():
     def __init__(self, file=None, blocksize=1024):
         self.blocksize = blocksize
         self._file = None
-        self.flag = 0
-        self.correlated = None
-        self.channel = None
-        self.channels = None
-        self.sample = []
+        self._filename = file
+        self._flag = 0
+        self._correlated = None
+        self._channel = None
+        self._sample = []
         if file is not None:
             self.file = file
 
+    file = property(lambda self: self._file)
+
+    filename = property(lambda self: self._filename)
+
+    flag = property(lambda self:self._flag)
+
+    correlated = property(lambda self:self._correlated)
+
+    sample = property(lambda self:self._sample)
+
+    channel = property(lambda self: self._channel)
+
+    channels = property(lambda self: self._file.channels)
+
     def __del__(self):
-        if self.file:
-            self.file.close()
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
     @classmethod
     def EMPTY(cls):
@@ -121,18 +141,19 @@ class Monolizer():
     def STEREO(cls):
         return -1
 
-    @property
-    def file(self):
-        return self._file
-
     @file.setter
     def file(self, file):
         self._file = sf(file)
-        self.flag = 0
-        self.sample = []
-        self.channel = self.chkMono()
+        self._setProperties(flag=0, sample=[])
+        self._channel = self._chkMono()
         self._file.seek(0)
-        self.channels = self._file.channels
+
+    def close(self):
+        if self.file:
+            self.file.close()
+            self._file = None
+            self._setProperties()
+            self._channel = None
 
     def _identify(self, flag=0, correlated=False, sample=[], eof=False):
         """
@@ -165,16 +186,16 @@ class Monolizer():
         return self._identify(flag=self.flag, correlated=self.correlated, sample=self.sample, eof=eof)
 
     def _setProperties(self, flag=None, correlated=None, sample=None):
-        self.flag = flag or self.flag
-        self.correlated = correlated if self.correlated != False else self.correlated
-        self.sample = sample or self.sample
+        self._flag = flag or self.flag
+        self._correlated = correlated if self.correlated != False else self.correlated
+        self._sample = sample or self.sample
 
     def _chkSampleblockMono(self, sampleblock):
         info = _SampleblockChannelInfo(sampleblock=sampleblock, flag=self.flag, sample=self.sample)
         info.set_info()
         return info.flag, info.isCorrelated(), info.sample, self.identify()
 
-    def chkMono(self):
+    def _chkMono(self):
         if self.file:
             for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
                 flag, correlated, sample, channel = self._chkSampleblockMono(sampleblock)
@@ -183,6 +204,8 @@ class Monolizer():
                     return channel
             channel = self.identify(eof=True)
             return channel
+        else:
+            return None
 
     def isMono(self):
         return self.channel == 1 or self.channel == 0
@@ -192,3 +215,11 @@ class Monolizer():
 
     def toMonolize(self):
         return self.isMono() and self.channels == 2
+
+    def writeMono(self, file=None):
+        if file and self.isMono():
+            data = [x[self.channel] for x in self.file.read()]
+            with sf(file, 'w', self.file.samplerate, 1,
+                   self.file.subtype, self.file.endian,
+                   self.file.format, True) as f:
+                f.write(data)
