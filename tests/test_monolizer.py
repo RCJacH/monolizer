@@ -2,8 +2,29 @@
 Tests for `monolizer` module.
 """
 import pytest
+import os
+import shutil
+import numpy as np
 from monolizer.monolizer import _SampleblockChannelInfo
 from monolizer import Monolizer
+from soundfile import read
+
+data_sin = (np.sin(np.array(range(0, 360, 15)) * np.pi / 180)).tolist()
+data_saw = [i/12 for i in range(-12, 12)]
+data_sins = [data_sin] * 2
+data_empty = [0] * 24
+data_stereo = [data_sin, data_saw]
+data_r50 = [data_sin, [i * 0.5 for i in data_sin]]
+data_l25 = [[i * 0.25 for i in data_sin], data_sin]
+data_r0 = [data_sin, data_empty]
+
+@pytest.fixture
+def tmpdir():
+    tmpdir = 'tests\\tmpdir\\'
+    if not os.path.exists(tmpdir):
+        os.makedirs(tmpdir)
+    yield tmpdir
+    shutil.rmtree(tmpdir)
 
 class Test_SampleblockChannelInfo(object):
 
@@ -11,7 +32,7 @@ class Test_SampleblockChannelInfo(object):
     def obj(self):
         return _SampleblockChannelInfo()
 
-    def test_detect_channel_signal(self, obj):
+    def test_flag_on_from_sample(self, obj):
         obj.flag = 0
         assert obj.flag_on_from_sample([0, 0.5]) == 2
         obj.flag = 0
@@ -21,73 +42,70 @@ class Test_SampleblockChannelInfo(object):
 
     def test_flag_on(self, obj):
         obj.flag = 0
-        obj2 = _SampleblockChannelInfo()
         assert obj.flag == 0
         assert obj.flag_on(1) == 1
         assert obj.flag_on(1) == 1
         assert obj.flag_on(2) == 3
-        assert obj2.flag == 0
         obj.flag = 0
 
     def test_transpose(self, obj):
         assert (obj._transpose([[0.1, 0.2], [0.3, 0.6], [0.15, 0.3]]) == [[0.1, 0.3, 0.15], [0.2, 0.6, 0.3]]).all()
 
     def test_get_ratio(self, obj):
-        assert obj.get_ratio([0.5, 0.5]) == 1
-        assert obj.get_ratio([0.22900572, 0.11450286]) == 0.5
-        assert obj.get_ratio([0., 0.]) == 0
+        assert obj._get_ratio([0.5, 0.5]) == 1
+        assert obj._get_ratio([0.22900572, 0.11450286]) == 0.5
+        assert obj._get_ratio([0., 0.]) == 0
 
     def test_is_ratio_correlated(self, obj):
-        assert obj.is_ratio_correlated([[1], [1]]) == True
-        assert obj.is_ratio_correlated([
+        assert obj._is_ratio_correlated([[1], [1]]) == True
+        assert obj._is_ratio_correlated([
                                         [0.99990839, 0.99987785, 0.99987783, 0.99984727],
                                         [0.998004  , 0.99800001, 0.99799599, 0.99799196]
                                         ]) == False
-        assert obj.is_ratio_correlated([
+        assert obj._is_ratio_correlated([
                                         [1.0148026 , 1.01443943, 1.01423377], 
                                         [1.0148026 , 1.01443943, 1.01423382]
                                         ]) == True
 
     def test_is_sampleblock_correlated(self, obj):
-        assert obj.is_sampleblock_correlated([[0.5, 0.5]] * 3) == True
-        assert obj.is_sampleblock_correlated([
+        assert obj._is_sampleblock_correlated([[0.5, 0.5]] * 3) == True
+        assert obj._is_sampleblock_correlated([
                                            [0.00308228, 0.00308228],
                                            [0.00613403, 0.00613403]
                                            ]) == True
-        assert obj.is_sampleblock_correlated([
+        assert obj._is_sampleblock_correlated([
                                             [0.22900572, 0.11450286], 
                                             [0.2323956,  0.1161978 ], 
                                             [0.23575126, 0.11787563], 
                                             [0.23910689, 0.11955345]
                                            ]) == True
-        assert obj.is_sampleblock_correlated([
+        assert obj._is_sampleblock_correlated([
                                            [0.99996948, 0.99996948],
                                            [0.99996948, 0.99804688],
                                            [0.99996948, 0.99609375]
                                            ]) == False
-        assert obj.is_sampleblock_correlated([[0., 0.]] * 3) == True
+        assert obj._is_sampleblock_correlated([[0., 0.]] * 3) == True
 
-    def test_set_sample_from_block(self, obj):
+    def test_set_sample_from_sampleblock(self, obj):
         obj.reset_sample()
         assert obj.sample == []
-        assert obj.set_sample_from_sampleblock([[0., 0.]] * 3) == []
-        assert obj.set_sample_from_sampleblock([
+        assert obj._set_sample_from_sampleblock([[0., 0.]] * 3) == []
+        assert obj._set_sample_from_sampleblock([
                                    [0.00308228, 0.00308228],
                                    [0.00613403, 0.00613403]
                                    ]) == [0.00308228, 0.00308228]
-        obj.reset_sample()
-        assert obj.set_sample_from_sampleblock([
+        assert obj._set_sample_from_sampleblock([
                                    [0.99996948, 0.],
                                    [0.99996948, 0.99804688],
                                    [0.99996948, 0.99609375]
                                    ]) == [0.99996948, 0.99804688]
+        obj.reset_sample()
 
     def test_is_sample_stereo(self, obj):
-        assert obj.is_sample_stereo([0.5, 0.3]) == True
-        assert obj.is_sample_stereo([0.5]) == False
-        assert obj.is_sample_stereo([0.5, 0.5]) == False
-        assert obj.is_sample_stereo([0, 0]) == False
-
+        assert obj._is_sample_stereo([0.5, 0.3]) == True
+        assert obj._is_sample_stereo([0.5]) == False
+        assert obj._is_sample_stereo([0.5, 0.5]) == False
+        assert obj._is_sample_stereo([0, 0]) == False
 
 class AudioInfo:
     def __init__(self, shape):
@@ -136,14 +154,16 @@ class AudioInfo:
             self.isEmpty = False
             self.isFakeStereo = True
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
         del self.src
 
 @pytest.fixture(params=["sin", "sins", "empty", "sin_tri", "sin_l50", "sin_r25", "sin_r100"])
 def audioinfo(request):
-    info = AudioInfo(request.param)
-    yield info
-    del info
+    with AudioInfo(request.param) as info:
+        yield info
 
 class TestMonolizer(object):
 
@@ -177,16 +197,10 @@ class TestMonolizer(object):
     def test_isFakeStereo(self, audioinfo):
         assert audioinfo.src.isFakeStereo == audioinfo.isFakeStereo
 
-    def test_writeMono(self):
-        import os
-        from soundfile import read
-        path = 'tests\\tmpdir\\'
-        if not os.path.exists(path):
-            os.makedirs(path)
-        file = os.path.join(path, 'testee.wav')
+    def test_writeMono(self, tmpdir):
+        file = os.path.join(tmpdir, 'testee.wav')
         with Monolizer(file='tests\\sins.wav') as obj:
             obj.writeMono(file)
         compare = read('tests\\sin.wav', always_2d=True)
         result = read(file, always_2d=True)
         assert (x == y for x in compare for y in result)
-        os.remove(file)
