@@ -1,8 +1,17 @@
 import pytest
+import os
+import shutil
 from monolizer import FileHandler, Monolizer
 
+@pytest.fixture
+def tmpdir():
+    tmpdir = 'tests\\tmpdir\\'
+    if not os.path.exists(tmpdir):
+        os.makedirs(tmpdir)
+    yield tmpdir
+    shutil.rmtree(tmpdir)
+
 class Test_FileHandler(object):
-    import os
 
     def test__init__no_input(self):
         obj = FileHandler()
@@ -30,3 +39,12 @@ class Test_FileHandler(object):
         with FileHandler('tests') as folder:
             assert [f.filename for f in folder.empty_files] == ['tests\\empty.wav']
 
+    def test_delete_empty_files(self, tmpdir):
+        tmp_empty = os.path.join(tmpdir, 'empty.wav')
+        tmp_sin = os.path.join(tmpdir, 'sin.wav')
+        shutil.copyfile('tests\\empty.wav', tmp_empty)
+        shutil.copyfile('tests\\sin.wav', tmp_sin)
+        with FileHandler(tmpdir) as folder:
+            folder.delete_empty_files()
+            pass
+        assert os.listdir(tmpdir) == ['sin.wav']

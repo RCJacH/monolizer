@@ -49,6 +49,12 @@ class FileHandler():
 
     empty_files = property(lambda self: [f for f in self.files if f.isEmpty])
 
+    def delete_empty_files(self):
+        for file in self.empty_files:
+            filename = file.filename
+            file.close()
+            os.remove(filename)
+
     def _is_audio_file(self, file):
         _, file_extension = os.path.splitext(file)
         return file_extension.upper() in (name.upper() for name in extensions)
