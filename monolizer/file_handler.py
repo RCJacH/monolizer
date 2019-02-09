@@ -65,7 +65,7 @@ class FileHandler():
 
     def monolize_fake_stereo_files(self, folder):
         for file in self.fake_stereo_files:
-            pass
+            file.monolize()
 
     def _is_audio_file(self, file):
         _, file_extension = os.path.splitext(file)

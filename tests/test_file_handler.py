@@ -2,6 +2,7 @@ import pytest
 import os
 import shutil
 from monolizer import FileHandler, Monolizer
+from soundfile import read
 
 all_files = set(['empty.wav', 'sin.wav', 'sins.wav', 'sin_l50.wav',
                 'sin_r25.wav', 'sin_r100.wav', 'sin_tri.wav', 'sinwave.wave'])
@@ -62,7 +63,10 @@ class Test_FileHandler(object):
             folder.delete_empty_files()
         assert os.listdir(tmpdir) == ['sin.wav']
 
-    def test_write_mono_files(self, tmpdir):
-        with FileHandler('tests') as folder:
+    def test_monolize_fake_stereo_files(self, tmpdir):
+        obj = FileHandler()
+        for file in obj._list_audio_files('tests'):
+            shutil.copyfile(os.path.join('tests', file), os.path.join(tmpdir, file))
+        with FileHandler(tmpdir) as folder:
             folder.monolize_fake_stereo_files(tmpdir)
-        # assert os.listdir(tmpdir) == fake_stereo_files
+            assert all([f.channels == 1 for f in folder.fake_stereo_files])
