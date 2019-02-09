@@ -1,4 +1,5 @@
 import os
+import shutil
 from .monolizer import Monolizer
 
 extensions = [".wav", ".wave"]
@@ -49,11 +50,22 @@ class FileHandler():
 
     empty_files = property(lambda self: [f for f in self.files if f.isEmpty])
 
+    fake_stereo_files = property(lambda self: [f for f in self.files if f.isFakeStereo])
+
+    def backup(self, folder):
+        for file in self.files:
+            filename = file.filename
+            shutil.copyfile(filename, os.path.join(folder, os.path.basename(filename)))
+
     def delete_empty_files(self):
         for file in self.empty_files:
             filename = file.filename
             file.close()
             os.remove(filename)
+
+    def monolize_fake_stereo_files(self, folder):
+        for file in self.fake_stereo_files:
+            pass
 
     def _is_audio_file(self, file):
         _, file_extension = os.path.splitext(file)

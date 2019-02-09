@@ -3,6 +3,13 @@ import os
 import shutil
 from monolizer import FileHandler, Monolizer
 
+all_files = set(['empty.wav', 'sin.wav', 'sins.wav', 'sin_l50.wav',
+                'sin_r25.wav', 'sin_r100.wav', 'sin_tri.wav', 'sinwave.wave'])
+fake_stereo_files = set(['sins.wav', 'sin_l50.wav', 'sin_r25.wav', 'sin_r100.wav'])
+
+def get_file_set(filelist):
+    return set(os.path.basename(f.filename) for f in filelist)
+
 @pytest.fixture
 def tmpdir():
     tmpdir = 'tests\\tmpdir\\'
@@ -31,13 +38,20 @@ class Test_FileHandler(object):
 
     def test_list_audio_files(self):
         obj = FileHandler()
-        assert (set(obj._list_audio_files('tests')) == 
-                set(['empty.wav', 'sin.wav', 'sins.wav', 'sin_l50.wav',
-                'sin_r25.wav', 'sin_r100.wav', 'sin_tri.wav', 'sinwave.wave']))
+        assert (set(obj._list_audio_files('tests')) == all_files)
 
     def test_empty_files(self):
         with FileHandler('tests') as folder:
-            assert [f.filename for f in folder.empty_files] == ['tests\\empty.wav']
+            assert get_file_set(folder.empty_files) == set(['empty.wav'])
+
+    def test_fake_stereo_files(self):
+        with FileHandler('tests') as folder:
+            assert get_file_set(folder.fake_stereo_files) == fake_stereo_files
+
+    def test_backup(self, tmpdir):
+        with FileHandler('tests') as folder:
+            folder.backup(tmpdir)
+        assert set(os.path.basename(f) for f in os.listdir(tmpdir)) == all_files
 
     def test_delete_empty_files(self, tmpdir):
         tmp_empty = os.path.join(tmpdir, 'empty.wav')
@@ -46,5 +60,9 @@ class Test_FileHandler(object):
         shutil.copyfile('tests\\sin.wav', tmp_sin)
         with FileHandler(tmpdir) as folder:
             folder.delete_empty_files()
-            pass
         assert os.listdir(tmpdir) == ['sin.wav']
+
+    def test_write_mono_files(self, tmpdir):
+        with FileHandler('tests') as folder:
+            folder.monolize_fake_stereo_files(tmpdir)
+        # assert os.listdir(tmpdir) == fake_stereo_files
