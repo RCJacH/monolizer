@@ -97,44 +97,44 @@ class AudioInfo:
             self.channel = 0
             self.channels = 1
             self.isMono = True
-            self.toDelete = False
-            self.toMonolize = False
+            self.isEmpty = False
+            self.isFakeStereo = False
         if shape == "sins":
             self.channel = 0
             self.channels = 2
             self.isMono = True
-            self.toDelete = False
-            self.toMonolize = True
+            self.isEmpty = False
+            self.isFakeStereo = True
         if shape == "empty":
             self.channel = self.src.EMPTY
             self.channels = 1
             self.isMono = False
-            self.toDelete = True
-            self.toMonolize = False
+            self.isEmpty = True
+            self.isFakeStereo = False
         if shape == "sin_tri":
             self.channel = self.src.STEREO
             self.channels = 2
             self.isMono = False
-            self.toDelete = False
-            self.toMonolize = False
+            self.isEmpty = False
+            self.isFakeStereo = False
         if shape == "sin_l50":
             self.channel = 0
             self.channels = 2
             self.isMono = True
-            self.toDelete = False
-            self.toMonolize = True
+            self.isEmpty = False
+            self.isFakeStereo = True
         if shape == "sin_r25":
             self.channel = 1
             self.channels = 2
             self.isMono = True
-            self.toDelete = False
-            self.toMonolize = True
+            self.isEmpty = False
+            self.isFakeStereo = True
         if shape == "sin_r100":
             self.channel = 1
             self.channels = 2
             self.isMono = True
-            self.toDelete = False
-            self.toMonolize = True
+            self.isEmpty = False
+            self.isFakeStereo = True
 
     def __del__(self):
         del self.src
@@ -169,13 +169,13 @@ class TestMonolizer(object):
         assert audioinfo.src.channel == audioinfo.channel
 
     def test_isMono(self, audioinfo):
-        assert audioinfo.src.isMono() == audioinfo.isMono
+        assert audioinfo.src.isMono == audioinfo.isMono
 
-    def test_toDelete(self, audioinfo):
-        assert audioinfo.src.toDelete() == audioinfo.toDelete
+    def test_isEmpty(self, audioinfo):
+        assert audioinfo.src.isEmpty == audioinfo.isEmpty
 
-    def test_toMonolize(self, audioinfo):
-        assert audioinfo.src.toMonolize() == audioinfo.toMonolize
+    def test_isFakeStereo(self, audioinfo):
+        assert audioinfo.src.isFakeStereo == audioinfo.isFakeStereo
 
     def test_writeMono(self):
         import os

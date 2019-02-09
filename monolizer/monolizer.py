@@ -98,6 +98,8 @@ class _SampleblockChannelInfo():
         self.set_correlation()
 
 class Monolizer():
+    EMPTY = -2
+    STEREO = -1
 
     def __init__(self, file=None, blocksize=1024):
         self.blocksize = blocksize
@@ -108,7 +110,10 @@ class Monolizer():
         self._channel = None
         self._sample = []
         if file is not None:
-            self.file = file
+            try:
+                self.file = file
+            except RuntimeError:
+                self.close()
 
     file = property(lambda self: self._file)
 
@@ -122,7 +127,13 @@ class Monolizer():
 
     channel = property(lambda self: self._channel)
 
-    channels = property(lambda self: self._file.channels)
+    channels = property(lambda self: self._file.channels if self._file else 0)
+
+    isMono = property(lambda self: self.channel == 1 or self.channel == 0)
+
+    isEmpty = property(lambda self: self.channel == Monolizer.EMPTY)
+
+    isFakeStereo = property(lambda self: self.isMono and self.channels == 2)
 
     def __del__(self):
         self.close()
@@ -133,13 +144,14 @@ class Monolizer():
     def __exit__(self, *args):
         self.close()
 
-    @classmethod
-    def EMPTY(cls):
-        return -2
-
-    @classmethod
-    def STEREO(cls):
-        return -1
+    def __str__(self):
+        info = "\n".join(
+            ["filename: {0.filename}",
+             "channels: {0.channels}",
+             "is mono: {0.isMono}",
+             "is empty: {0.isEmpty}",
+             "is fake stereo: {0.isFakeStereo}"])
+        return info.format(self)
 
     @file.setter
     def file(self, file):
@@ -207,17 +219,8 @@ class Monolizer():
         else:
             return None
 
-    def isMono(self):
-        return self.channel == 1 or self.channel == 0
-
-    def toDelete(self):
-        return self.channel == self.EMPTY
-
-    def toMonolize(self):
-        return self.isMono() and self.channels == 2
-
     def writeMono(self, file=None):
-        if file and self.isMono():
+        if file and self.isMono:
             data = [x[self.channel] for x in self.file.read()]
             with sf(file, 'w', self.file.samplerate, 1,
                    self.file.subtype, self.file.endian,
