@@ -8,45 +8,45 @@ class _SampleblockChannelInfo():
     NULL_THRESHOLD = 0.000001
 
     def __init__(self, flag=0, sample=[], sampleblock=None):
-        self._channel_flag = flag
+        self.flag = flag
         self.isCorrelated = None
         self.sample = sample
-        self.sampleblock = sampleblock
         if sampleblock is not None:
-            self.set_info()
+            self.set_info(sampleblock)
 
-    @property
-    def flag(self):
-        return self._channel_flag
+    def set_info(self, sampleblock):
+        self.set_flag(sampleblock)
+        self.set_correlation(sampleblock)
+        self.set_sample(sampleblock)
 
-    @flag.setter
-    def flag(self, value):
-        try:
-            self._channel_flag |= 1 << (value - 1)
-        except ValueError:
-            self._channel_flag = 0
-
-    def set_info(self):
-        self.set_flag()
-        self.set_correlation()
-        self.set_sample()
-
-    def flag_on(self, n):
-        self.flag = n
-        return self.flag
-
-    def flag_on_from_sample(self, samples):
-        [self.flag_on(i + 1) for i, v in enumerate(samples) if v != 0]
-        return self.flag
-
-    def set_flag(self):
+    def set_flag(self, sampleblock):
         [self.flag_on(i + 1) for i, v in
-         enumerate(self._transpose(self.sampleblock))
+         enumerate(self._transpose(sampleblock))
          if (v != 0).any()]
         return self.flag
 
     def _transpose(self, samples):
         return np.array(samples).transpose(1, 0)
+
+    def flag_on(self, n):
+        try:
+            self.flag |= 1 << (n - 1)
+        except ValueError:
+            self.flag = 0
+        return self.flag
+
+    def _flag_on_from_sample(self, samples):
+        [self.flag_on(i + 1) for i, v in enumerate(samples) if v != 0]
+        return self.flag
+
+    def set_correlation(self, sampleblock):
+        self.isCorrelated = self._is_sampleblock_correlated(sampleblock)
+
+    def _is_sampleblock_correlated(self, sampleblock):
+        if len(sampleblock[0]) == 1:
+            return True
+        ratios = [self._get_ratio(samples) for samples in self._transpose(sampleblock)]
+        return self._is_ratio_correlated(ratios)
 
     def _get_ratio(self, samples):
         a = np.array(samples[:-1])
@@ -56,40 +56,33 @@ class _SampleblockChannelInfo():
     def _is_ratio_correlated(self, ratios):
         return (np.subtract(*ratios).flat < self.NULL_THRESHOLD).all()
 
-    def _is_sampleblock_correlated(self, sampleblock):
-        if len(sampleblock[0]) == 1:
-            return True
-        ratios = [self._get_ratio(samples) for samples in self._transpose(sampleblock)]
-        return self._is_ratio_correlated(ratios)
+    def set_sample(self, sampleblock):
+        self.sample = self._get_sample_from_sampleblock(sampleblock)
 
-    def set_correlation(self):
-        self.isCorrelated = self._is_sampleblock_correlated(self.sampleblock)
+    def reset_sample(self):
+        self.sample = []
 
-    def _validate_sample(self, samples):
-        try:
-            return samples.tolist()
-        except AttributeError:
-            return samples
+    def _get_sample_from_sampleblock(self, sampleblock):
+        sample = self.sample
+        if not sample or not self._is_sample_stereo(sample):
+            sample = self._get_valid_sample(sampleblock)
+        return sample
+
+    def _is_sample_stereo(self, sample):
+        return len(set(sample)) > 1
 
     def _get_valid_sample(self, sampleblock):
         try:
             return next((self._validate_sample(samples) for samples in sampleblock if 0 not in samples))
         except StopIteration:
             return []
+    
+    def _validate_sample(self, samples):
+        try:
+            return samples.tolist()
+        except AttributeError:
+            return samples
 
-    def _is_sample_stereo(self, sample):
-        return len(set(sample)) > 1
-
-    def _set_sample_from_sampleblock(self, sampleblock):
-        if not self.sample or not self._is_sample_stereo(self.sample):
-            self.sample = self._get_valid_sample(sampleblock)
-        return self.sample
-
-    def set_sample(self):
-        self._set_sample_from_sampleblock(self.sampleblock)
-
-    def reset_sample(self):
-        self.sample = []
 
 class Monolizer():
     EMPTY = -2

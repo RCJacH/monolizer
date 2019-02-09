@@ -34,11 +34,11 @@ class Test_SampleblockChannelInfo(object):
 
     def test_flag_on_from_sample(self, obj):
         obj.flag = 0
-        assert obj.flag_on_from_sample([0, 0.5]) == 2
+        assert obj._flag_on_from_sample([0, 0.5]) == 2
         obj.flag = 0
-        assert obj.flag_on_from_sample([-0.25, 0]) == 1
+        assert obj._flag_on_from_sample([-0.25, 0]) == 1
         obj.flag = 0
-        assert obj.flag_on_from_sample([0., 0.]) == 0
+        assert obj._flag_on_from_sample([0., 0.]) == 0
 
     def test_flag_on(self, obj):
         obj.flag = 0
@@ -86,15 +86,15 @@ class Test_SampleblockChannelInfo(object):
                                            ]) == False
         assert obj._is_sampleblock_correlated([[0., 0.]] * 3) == True
 
-    def test_set_sample_from_sampleblock(self, obj):
+    def test_get_sample_from_sampleblock(self, obj):
         obj.reset_sample()
         assert obj.sample == []
-        assert obj._set_sample_from_sampleblock([[0., 0.]] * 3) == []
-        assert obj._set_sample_from_sampleblock([
+        assert obj._get_sample_from_sampleblock([[0., 0.]] * 3) == []
+        assert obj._get_sample_from_sampleblock([
                                    [0.00308228, 0.00308228],
                                    [0.00613403, 0.00613403]
                                    ]) == [0.00308228, 0.00308228]
-        assert obj._set_sample_from_sampleblock([
+        assert obj._get_sample_from_sampleblock([
                                    [0.99996948, 0.],
                                    [0.99996948, 0.99804688],
                                    [0.99996948, 0.99609375]
