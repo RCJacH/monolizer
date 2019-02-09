@@ -212,10 +212,12 @@ class Monolizer():
         else:
             return None
 
-    def writeMono(self, file=None):
-        if file and self.isMono:
+    def monolize(self):
+        if self.file and self.isMono:
             data = [x[self.channel] for x in self.file.read()]
-            with sf(file, 'w', self.file.samplerate, 1,
+            self.file.close()
+            with sf(self.filename, 'w', self.file.samplerate, 1,
                    self.file.subtype, self.file.endian,
                    self.file.format, True) as f:
                 f.write(data)
+            self.file = self.filename

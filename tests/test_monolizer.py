@@ -197,10 +197,11 @@ class TestMonolizer(object):
     def test_isFakeStereo(self, audioinfo):
         assert audioinfo.src.isFakeStereo == audioinfo.isFakeStereo
 
-    def test_writeMono(self, tmpdir):
-        file = os.path.join(tmpdir, 'testee.wav')
-        with Monolizer(file='tests\\sins.wav') as obj:
-            obj.writeMono(file)
+    def test_monolize(self, tmpdir):
+        file = os.path.join(tmpdir, 'sins.wav')
+        shutil.copyfile('tests\\sins.wav', file)
+        with Monolizer(file=file) as obj:
+            obj.monolize()
         compare = read('tests\\sin.wav', always_2d=True)
         result = read(file, always_2d=True)
         assert (x == y for x in compare for y in result)
