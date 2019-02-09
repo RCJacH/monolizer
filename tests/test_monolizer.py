@@ -34,11 +34,11 @@ class Test_SampleblockChannelInfo(object):
 
     def test_flag_on_from_sample(self, obj):
         obj.flag = 0
-        assert obj._flag_on_from_sample([0, 0.5]) == 2
+        assert obj.set_flag([[0, 0.5]]) == 2
         obj.flag = 0
-        assert obj._flag_on_from_sample([-0.25, 0]) == 1
+        assert obj.set_flag([[-0.25, 0]]) == 1
         obj.flag = 0
-        assert obj._flag_on_from_sample([0., 0.]) == 0
+        assert obj.set_flag([[0., 0.]]) == 0
 
     def test_flag_on(self, obj):
         obj.flag = 0

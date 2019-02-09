@@ -35,10 +35,6 @@ class _SampleblockChannelInfo():
             self.flag = 0
         return self.flag
 
-    def _flag_on_from_sample(self, samples):
-        [self.flag_on(i + 1) for i, v in enumerate(samples) if v != 0]
-        return self.flag
-
     def set_correlation(self, sampleblock):
         self.isCorrelated = self._is_sampleblock_correlated(sampleblock)
 
