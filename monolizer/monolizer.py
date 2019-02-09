@@ -7,10 +7,10 @@ from soundfile import write
 class _SampleblockChannelInfo():
     NULL_THRESHOLD = 0.000001
 
-    def __init__(self, flag=0, sample=[], sampleblock=None):
-        self.flag = flag
-        self.isCorrelated = None
-        self.sample = sample
+    def __init__(self, flag=0, correlated=None, sample=[], sampleblock=None):
+        self.flag = flag != None and flag
+        self.isCorrelated = correlated
+        self.sample = sample != None and sample
         if sampleblock is not None:
             self.set_info(sampleblock)
 
@@ -36,7 +36,8 @@ class _SampleblockChannelInfo():
         return self.flag
 
     def set_correlation(self, sampleblock):
-        self.isCorrelated = self._is_sampleblock_correlated(sampleblock)
+        if self.isCorrelated != False:
+            self.isCorrelated = self._is_sampleblock_correlated(sampleblock)
 
     def _is_sampleblock_correlated(self, sampleblock):
         if len(sampleblock[0]) == 1:
@@ -88,10 +89,7 @@ class Monolizer():
         self.blocksize = blocksize
         self._file = None
         self._filename = file
-        self._flag = 0
-        self._correlated = None
         self._channel = None
-        self._sample = []
         if file is not None:
             try:
                 self.file = file
@@ -100,17 +98,17 @@ class Monolizer():
 
     file = property(lambda self: self._file)
 
+    @file.setter
+    def file(self, file):
+        self._file = sf(file)
+        self._channel = self._check_mono()
+        self._file.seek(0)
+
     filename = property(lambda self: self._filename)
-
-    flag = property(lambda self:self._flag)
-
-    correlated = property(lambda self:self._correlated)
-
-    sample = property(lambda self:self._sample)
 
     channel = property(lambda self: self._channel)
 
-    channels = property(lambda self: self._file.channels if self._file else 0)
+    channels = property(lambda self: self._file.channels if self.file else 0)
 
     isMono = property(lambda self: self.channel == 1 or self.channel == 0)
 
@@ -136,21 +134,13 @@ class Monolizer():
              "is fake stereo: {0.isFakeStereo}"])
         return info.format(self)
 
-    @file.setter
-    def file(self, file):
-        self._file = sf(file)
-        self._setProperties(flag=0, sample=[])
-        self._channel = self._chkMono()
-        self._file.seek(0)
-
     def close(self):
         if self.file:
             self.file.close()
             self._file = None
-            self._setProperties()
             self._channel = None
 
-    def _identify(self, flag=0, correlated=False, sample=[], eof=False):
+    def _identify_channel(self, flag=0, correlated=False, sample=[], eof=False):
         """
         Possibility for channels
         L == 0; # Empty
@@ -177,32 +167,26 @@ class Monolizer():
                     raise Exception('Sample argument must have at least length of 1.')
         return None
 
-    def identify(self, eof=False):
-        return self._identify(flag=self.flag, correlated=self.correlated, sample=self.sample, eof=eof)
-
-    def _setProperties(self, flag=None, correlated=None, sample=None):
-        self._flag = flag or self.flag
-        self._correlated = correlated if self.correlated != False else self.correlated
-        self._sample = sample or self.sample
-
-    def _chkSampleblockMono(self, sampleblock):
-        info = _SampleblockChannelInfo(sampleblock=sampleblock, flag=self.flag, sample=self.sample)
-        return info.flag, info.isCorrelated, info.sample, self.identify()
-
-    def _chkMono(self):
+    def _check_mono(self):
         if self.file:
+            flag = correlated = sample = None
             for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
-                flag, correlated, sample, channel = self._chkSampleblockMono(sampleblock)
-                self._setProperties(flag, correlated, sample)
+                info = _SampleblockChannelInfo(sampleblock=sampleblock,
+                                                flag=flag,
+                                                correlated=correlated,
+                                                sample=sample)
+                flag = info.flag
+                correlated = info.isCorrelated
+                sample = info.sample
+                channel = self._identify_channel(flag, correlated, sample)
                 if channel is not None:
                     return channel
-            channel = self.identify(eof=True)
-            return channel
+            return self._identify_channel(flag, correlated, sample, eof=True)
         else:
             return None
 
     def monolize(self):
-        if self.file and self.isMono:
+        if self.file and self.isMono and self.isFakeStereo:
             data = [x[self.channel] for x in self.file.read()]
             self.file.close()
             with sf(self.filename, 'w', self.file.samplerate, 1,

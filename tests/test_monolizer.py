@@ -169,18 +169,18 @@ class TestMonolizer(object):
 
     def test_identify(self):
         obj = Monolizer()
-        assert obj._identify(flag=0, eof=True) == obj.EMPTY
-        assert obj._identify(flag=0, eof=False) == None
-        assert obj._identify(flag=3, correlated=False) == obj.STEREO
-        assert obj._identify(flag=3, eof=True) == obj.STEREO
-        assert obj._identify(flag=3, correlated=True, eof=False) == None
-        assert obj._identify(flag=0, correlated=True, eof=False) == None
-        assert obj._identify(flag=1, eof=False, sample=[0.1]) == 0
-        assert obj._identify(flag=1, correlated=False, sample=[0.1, 0.2]) == None
-        assert obj._identify(flag=1, eof=True, correlated=False) == 0
-        assert obj._identify(flag=2, eof=True, correlated=False) == 1
-        assert obj._identify(flag=3, eof=True, correlated=True, sample=[0.1, 0.2]) == 1
-        assert obj._identify(flag=3, eof=True, correlated=True, sample=[0.5, 0.2]) == 0
+        assert obj._identify_channel(flag=0, eof=True) == obj.EMPTY
+        assert obj._identify_channel(flag=0, eof=False) == None
+        assert obj._identify_channel(flag=3, correlated=False) == obj.STEREO
+        assert obj._identify_channel(flag=3, eof=True) == obj.STEREO
+        assert obj._identify_channel(flag=3, correlated=True, eof=False) == None
+        assert obj._identify_channel(flag=0, correlated=True, eof=False) == None
+        assert obj._identify_channel(flag=1, eof=False, sample=[0.1]) == 0
+        assert obj._identify_channel(flag=1, correlated=False, sample=[0.1, 0.2]) == None
+        assert obj._identify_channel(flag=1, eof=True, correlated=False) == 0
+        assert obj._identify_channel(flag=2, eof=True, correlated=False) == 1
+        assert obj._identify_channel(flag=3, eof=True, correlated=True, sample=[0.1, 0.2]) == 1
+        assert obj._identify_channel(flag=3, eof=True, correlated=True, sample=[0.5, 0.2]) == 0
         with pytest.raises(Exception):
             obj._identify(flag=3, eof=True, correlated=True, sample=[])
         del obj
