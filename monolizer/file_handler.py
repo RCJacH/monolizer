@@ -32,12 +32,10 @@ Potential additions supported by PySoundFile library
  'XI': 'XI (FastTracker 2)'}
 '''
 class FileHandler():
-    folder = None
 
     def __init__(self, folder=None):
         if folder and os.path.exists(folder):
             self.folder = folder
-            self.files = [Monolizer(os.path.join(folder, f)) for f in self._list_audio_files(folder)]
 
     def __enter__(self):
         return self
@@ -47,6 +45,15 @@ class FileHandler():
 
     def close(self):
         (f.close() for f in self.files)
+
+    @property
+    def folder(self):
+        return self._folder
+
+    @folder.setter
+    def folder(self, folder):
+        self._folder = folder
+        self.files = [Monolizer(os.path.join(folder, f)) for f in self._list_audio_files(_folder)]
 
     empty_files = property(lambda self: [f for f in self.files if f.isEmpty])
 
