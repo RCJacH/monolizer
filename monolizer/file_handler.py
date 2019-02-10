@@ -34,6 +34,7 @@ Potential additions supported by PySoundFile library
 class FileHandler():
 
     def __init__(self, folder=None):
+        self._folder = None
         if folder and os.path.exists(folder):
             self.folder = folder
 
@@ -53,22 +54,36 @@ class FileHandler():
     @folder.setter
     def folder(self, folder):
         self._folder = folder
-        self.files = [Monolizer(os.path.join(folder, f)) for f in self._list_audio_files(_folder)]
+        self.files = [Monolizer(os.path.join(folder, f)) for f in self._list_audio_files(folder)]
+
+    filenames = property(lambda self: [f.filename for f in self.files])
 
     empty_files = property(lambda self: [f for f in self.files if f.isEmpty])
 
     fake_stereo_files = property(lambda self: [f for f in self.files if f.isFakeStereo])
 
-    def backup(self, folder):
-        for file in self.files:
-            filename = file.filename
-            shutil.copyfile(filename, os.path.join(folder, os.path.basename(filename)))
+    def backup(self, folder='RAW', newfolder=True):
+        def join(folder, inc=''):
+            return os.path.join(self.folder, folder.rstrip('\\') + inc)
+
+        dirname = join(folder)
+        if newfolder:
+            i = 1
+            while os.path.exists(dirname):
+                dirname = join(folder, str(i))
+                i += 1
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        for filename in self.filenames:
+            shutil.copyfile(filename, os.path.join(dirname, os.path.basename(filename)))
 
     def delete_empty_files(self):
         for file in self.empty_files:
             filename = file.filename
             file.close()
             os.remove(filename)
+            self.files.remove(file)
 
     def monolize_fake_stereo_files(self, folder):
         for file in self.fake_stereo_files:

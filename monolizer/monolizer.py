@@ -1,7 +1,6 @@
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
-from soundfile import write
 
 
 class _SampleblockChannelInfo():
