@@ -111,7 +111,7 @@ class Monolizer():
 
     isMono = property(lambda self: self.channel == 1 or self.channel == 0)
 
-    isEmpty = property(lambda self: self.channel == Monolizer.EMPTY)
+    isEmpty = property(lambda self: self.channel == self.EMPTY)
 
     isFakeStereo = property(lambda self: self.isMono and self.channels == 2)
 
@@ -125,13 +125,11 @@ class Monolizer():
         self.close()
 
     def __str__(self):
-        info = "\n".join(
-            ["filename: {0.filename}",
-             "channels: {0.channels}",
-             "is mono: {0.isMono}",
-             "is empty: {0.isEmpty}",
-             "is fake stereo: {0.isFakeStereo}"])
-        return info.format(self)
+        empty = self.isEmpty and 'Empty' or ''
+        fake = self.isFakeStereo and 'FakeStereo' or ''
+        info = "\t".join(
+            ["{0.filename}", "Channels: {0.channels}", empty, fake])
+        return info.format(self)+'\n'
 
     def close(self):
         if self.file:

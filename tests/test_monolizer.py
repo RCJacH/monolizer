@@ -205,3 +205,12 @@ class TestMonolizer(object):
         compare = read('tests\\sin.wav', always_2d=True)
         result = read(file, always_2d=True)
         assert (x == y for x in compare for y in result)
+
+    def test__str__(self):
+        with Monolizer(file='tests\\sin.wav') as obj:
+            assert str(obj) == 'tests\\sin.wav\tChannels: 1\t\t\n'
+        with Monolizer(file='tests\\sins.wav') as obj:
+            assert str(obj) == 'tests\\sins.wav\tChannels: 2\t\tFakeStereo\n'
+        with Monolizer(file='tests\\empty.wav') as obj:
+            assert str(obj) == 'tests\\empty.wav\tChannels: 1\tEmpty\t\n'
+
