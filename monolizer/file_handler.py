@@ -41,6 +41,9 @@ class FileHandler():
     def __enter__(self):
         return self
 
+    def __repr__(self):
+        return '\n'.join(map(str, self.files))
+
     def __exit__(self, *args):
         self.close()
 
@@ -85,7 +88,7 @@ class FileHandler():
             os.remove(filename)
             self.files.remove(file)
 
-    def monolize_fake_stereo_files(self, folder):
+    def monolize_fake_stereo_files(self):
         for file in self.fake_stereo_files:
             file.monolize()
 

@@ -43,7 +43,7 @@ class Test_FileHandler(object):
 
     def test_empty_files(self):
         with FileHandler('tests') as folder:
-            assert get_file_set(folder.empty_files) == set(['empty.wav'])
+            assert get_file_set(folder.empty_files) == set(['sinwave.wave', 'empty.wav'])
 
     def test_fake_stereo_files(self):
         with FileHandler('tests') as folder:
@@ -85,5 +85,5 @@ class Test_FileHandler(object):
         for file in obj._list_audio_files('tests'):
             shutil.copyfile(os.path.join('tests', file), os.path.join(tmpdir, file))
         with FileHandler(tmpdir) as folder:
-            folder.monolize_fake_stereo_files(tmpdir)
+            folder.monolize_fake_stereo_files()
             assert all([f.channels == 1 for f in folder.fake_stereo_files])

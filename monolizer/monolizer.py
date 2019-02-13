@@ -111,7 +111,7 @@ class Monolizer():
 
     isMono = property(lambda self: self.channel == 1 or self.channel == 0)
 
-    isEmpty = property(lambda self: self.channel == self.EMPTY)
+    isEmpty = property(lambda self: self.channel == self.EMPTY or self.channels == 0)
 
     isFakeStereo = property(lambda self: self.isMono and self.channels == 2)
 
