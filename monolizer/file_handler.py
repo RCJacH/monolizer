@@ -82,15 +82,22 @@ class FileHandler():
             shutil.copyfile(filename, os.path.join(dirname, os.path.basename(filename)))
 
     def delete_empty_files(self):
+        filenames = []
         for file in self.empty_files:
             filename = file.filename
+            filenames.append(filename)
             file.close()
             os.remove(filename)
             self.files.remove(file)
+        return filenames
 
     def monolize_fake_stereo_files(self):
+        filenames = []
         for file in self.fake_stereo_files:
+            filename = file.filename
+            filenames.append(filename)
             file.monolize()
+        return filenames
 
     def _is_audio_file(self, file):
         _, file_extension = os.path.splitext(file)
