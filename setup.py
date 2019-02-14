@@ -26,7 +26,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 setup(
     name='monolizer',
     version='0.1.0',
-    description='Detect and convert fake stereo and multi-channel audio files to single-channel ones.',
+    description='Identify and convert fake stereo audio files to mono-channel ones, and delete empty audio files.',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
     author='RCJacH',
     author_email='RCJacH@outlook.com',
