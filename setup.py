@@ -14,11 +14,13 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 readme = open('README.rst').read()
+
 doclink = """
 Documentation
 -------------
 
 The full documentation is at http://monolizer.rtfd.org."""
+
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
@@ -32,23 +34,32 @@ setup(
     packages=[
         'monolizer',
     ],
-    package_dir={'monolizer': 'monolizer'},
+    # package_dir={'monolizer': 'monolizer'},
+    # entry_point={"console_scripts": []},
     include_package_data=True,
     install_requires=[
+        'soundfile>=0.9.0',
+        'numpy',
     ],
+    extras_require={
+        'testing': [
+            'pytest>=3.0.0',
+        ]
+    },
     license='MIT',
     zip_safe=False,
-    keywords='monolizer',
+    keywords='monolizer monolize wave audio mono stereo music',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
+        "Operating System :: POSIX",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS :: MacOS X",
+        'Programming Language :: Python',
         'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Artistic Software',
+        'Topic :: Multimedia :: Sound/Audio',
     ],
 )
