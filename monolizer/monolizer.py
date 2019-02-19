@@ -100,8 +100,9 @@ class Monolizer():
     @file.setter
     def file(self, file):
         self._file = sf(file)
-        self._channel = self._check_mono()
-        self._file.seek(0)
+        if self._file.channels <= 2:
+            self._channel = self._check_mono()
+            self._file.seek(0)
 
     filename = property(lambda self: self._filename)
 
