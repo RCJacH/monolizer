@@ -25,7 +25,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='monolizer',
-    version='0.1.0',
+    version='0.1.1a1',
     description='Identify and convert fake stereo audio files to mono-channel ones, and delete empty audio files.',
     long_description=readme + '\n\n' + doclink + '\n\n' + history,
     author='RCJacH',
@@ -35,10 +35,9 @@ setup(
         'monolizer',
     ],
     # package_dir={'monolizer': 'monolizer'},
-    # entry_point={"console_scripts": []},
     include_package_data=True,
     install_requires=[
-        'soundfile>=0.9.0',
+        'PySoundFile>=0.9.0',
         'numpy',
     ],
     extras_require={
