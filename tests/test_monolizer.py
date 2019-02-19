@@ -9,15 +9,6 @@ from monolizer.monolizer import _SampleblockChannelInfo
 from monolizer import Monolizer
 from soundfile import read
 
-data_sin = (np.sin(np.array(range(0, 360, 15)) * np.pi / 180)).tolist()
-data_saw = [i/12 for i in range(-12, 12)]
-data_sins = [data_sin] * 2
-data_empty = [0] * 24
-data_stereo = [data_sin, data_saw]
-data_r50 = [data_sin, [i * 0.5 for i in data_sin]]
-data_l25 = [[i * 0.25 for i in data_sin], data_sin]
-data_r0 = [data_sin, data_empty]
-
 @pytest.fixture
 def tmpdir():
     tmpdir = 'tests\\tmpdir\\'
@@ -213,4 +204,3 @@ class TestMonolizer(object):
             assert str(obj) == 'tests\\sins.wav\tChannels: 2\t\tFakeStereo\n'
         with Monolizer(file='tests\\empty.wav') as obj:
             assert str(obj) == 'tests\\empty.wav\tChannels: 1\tEmpty\t\n'
-
