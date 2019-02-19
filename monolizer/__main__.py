@@ -65,6 +65,7 @@ def main(args=None):
         else:
             print(folder)
 
+    del folder
 
 if __name__ == "__main__":
     main()
