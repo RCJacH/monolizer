@@ -1,10 +1,18 @@
+"""Classes for analyzing audio and determine their actual channel info.
+    _SampleblockChannelInfo is a calculating class that receive sampleblock
+information and calculates the ratio between all sample sets of stereo
+channels, then returning the channel info of the sampleblock.
+    Monolizer is the file handler that takes a file and analyze channel info
+of the file, with methods to combine stereo channels into mono channel.
+"""
+
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
 
 
 class _SampleblockChannelInfo():
-    NULL_THRESHOLD = 0.000001
+    NULL_THRESHOLD = 0.000001 # TODO: get threshold from minimum bit info
 
     def __init__(self, flag=0, correlated=None, sample=[], sampleblock=None):
         self.flag = flag != None and flag
