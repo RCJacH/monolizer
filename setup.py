@@ -35,9 +35,10 @@ setup(
         'monolizer',
     ],
     # package_dir={'monolizer': 'monolizer'},
+    entry_points={'console_scripts': ['monolizer = monolizer.__main__:main']},
     include_package_data=True,
     install_requires=[
-        'PySoundFile>=0.9.0',
+        'PySoundFile==0.9.0.post1',
         'numpy',
     ],
     extras_require={
