@@ -81,7 +81,7 @@ class FileHandler():
         for filename in self.filenames:
             shutil.copyfile(filename, os.path.join(dirname, os.path.basename(filename)))
 
-    def delete_empty_files(self):
+    def remove_empty_files(self):
         filenames = []
         for file in self.empty_files:
             filename = file.filename

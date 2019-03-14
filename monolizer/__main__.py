@@ -24,9 +24,9 @@ def parser(args):
     # parser.add_argument('-f', '--folder',
     #                     nargs=1, default='',
     #                     help='Output folder for monolized files.')
-    parser.add_argument('-d', '--delete',
+    parser.add_argument('-r', '--remove',
                         action='store_true',
-                        help='Delete all empty/silent audio files')
+                        help='Remove all empty/silent audio files')
     parser.add_argument('-m', '--monolize',
                         action='store_true',
                         help='Convert all fake stereo files into mono files.')
@@ -56,8 +56,8 @@ def main(args=None):
             if args.auto or (not args.overwrite and args.backup):
                 folder.backup(folder=args.backup[0], newfolder=args.inc)
                 print('Backed up all original files to {} subfolder'.format(args.backup[0]))
-            if args.auto or args.delete:
-                files = folder.delete_empty_files()
+            if args.auto or args.remove:
+                files = folder.remove_empty_files()
                 print('Deleted files: {}'.format(' '.join(files)))
             if args.auto or args.monolize:
                 files = folder.monolize_fake_stereo_files()

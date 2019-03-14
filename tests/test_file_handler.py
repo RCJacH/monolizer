@@ -70,13 +70,13 @@ class Test_FileHandler(object):
         shutil.rmtree(default)
         shutil.rmtree(default_inc)
 
-    def test_delete_empty_files(self, tmpdir):
+    def test_remove_empty_files(self, tmpdir):
         tmp_empty = os.path.join(tmpdir, 'empty.wav')
         tmp_sin = os.path.join(tmpdir, 'sin.wav')
         shutil.copyfile('tests\\empty.wav', tmp_empty)
         shutil.copyfile('tests\\sin.wav', tmp_sin)
         with FileHandler(tmpdir) as folder:
-            folder.delete_empty_files()
+            folder.remove_empty_files()
             assert 'empty.wav' not in folder.filenames
         assert os.listdir(tmpdir) == ['sin.wav']
 
