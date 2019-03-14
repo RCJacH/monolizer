@@ -46,26 +46,31 @@ def main(args=None):
         args = sys.argv[1:]
     args = parser(args)
 
-    from monolizer import FileHandler
-
-    folder = FileHandler(folder=os.getcwd())
-    if len(folder.files) == 0:
-        print('No audio files found in current directory.')
+    if args.file:
+        from monolizer import Monolizer
+        with Monolizer(file=args.file[0]) as obj:
+            print(obj)
     else:
-        if args.auto or args.delete or args.monolize:
-            if args.auto or (not args.overwrite and args.backup):
-                folder.backup(folder=args.backup[0], newfolder=args.inc)
-                print('Backed up all original files to {} subfolder'.format(args.backup[0]))
-            if args.auto or args.remove:
-                files = folder.remove_empty_files()
-                print('Deleted files: {}'.format(' '.join(files)))
-            if args.auto or args.monolize:
-                files = folder.monolize_fake_stereo_files()
-                print('Monolized files: {}'.format(' '.join(files)))
-        else:
-            print(folder)
+        from monolizer import FileHandler
 
-    del folder
+        folder = FileHandler(folder=os.getcwd())
+        if len(folder.files) == 0:
+            print('No audio files found in current directory.')
+        else:
+            if args.auto or args.delete or args.monolize:
+                if args.auto or (not args.overwrite and args.backup):
+                    folder.backup(folder=args.backup[0], newfolder=args.inc)
+                    print('Backed up all original files to {} subfolder'.format(args.backup[0]))
+                if args.auto or args.remove:
+                    files = folder.remove_empty_files()
+                    print('Deleted files: {}'.format(' '.join(files)))
+                if args.auto or args.monolize:
+                    files = folder.monolize_fake_stereo_files()
+                    print('Monolized files: {}'.format(' '.join(files)))
+            else:
+                print(folder)
+
+        del folder
 
 if __name__ == "__main__":
     main()
