@@ -138,7 +138,7 @@ class Monolizer():
         fake = self.isFakeStereo and 'FakeStereo' or ''
         info = "\t".join(
             ["{0.filename}", "Channels: {0.channels}", empty, fake])
-        return info.format(self)+'\n'
+        return info.format(self)
 
     def close(self):
         if self.file:
