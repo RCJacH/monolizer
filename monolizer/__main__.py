@@ -21,9 +21,9 @@ def parser(args):
                         action='store_true',
                         help='Add a number to the backup folder name if the \
                         folder exists to avoid overwriting existing folder.')
-    # parser.add_argument('-f', '--folder',
-    #                     nargs=1, default='',
-    #                     help='Output folder for monolized files.')
+    parser.add_argument('-f', '--file',
+                        nargs=1, default='',
+                        help='Select a single file to monolize.')
     parser.add_argument('-r', '--remove',
                         action='store_true',
                         help='Remove all empty/silent audio files')
