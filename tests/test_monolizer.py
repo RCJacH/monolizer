@@ -199,8 +199,8 @@ class TestMonolizer(object):
 
     def test__str__(self):
         with Monolizer(file='tests\\sin.wav') as obj:
-            assert str(obj) == 'tests\\sin.wav\tChannels: 1\t\t\n'
+            assert str(obj) == 'tests\\sin.wav\tChannels: 1\t\t'
         with Monolizer(file='tests\\sins.wav') as obj:
-            assert str(obj) == 'tests\\sins.wav\tChannels: 2\t\tFakeStereo\n'
+            assert str(obj) == 'tests\\sins.wav\tChannels: 2\t\tFakeStereo'
         with Monolizer(file='tests\\empty.wav') as obj:
-            assert str(obj) == 'tests\\empty.wav\tChannels: 1\tEmpty\t\n'
+            assert str(obj) == 'tests\\empty.wav\tChannels: 1\tEmpty\t'
