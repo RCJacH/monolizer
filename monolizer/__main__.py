@@ -24,6 +24,9 @@ def parser(args):
     parser.add_argument('-f', '--file',
                         nargs=1, default='',
                         help='Select a single file to monolize.')
+    parser.add_argument('--debug',
+                        action='store_true',
+                        help='Generate a debug file of the selected file.')
     parser.add_argument('-r', '--remove',
                         action='store_true',
                         help='Remove all empty/silent audio files')
@@ -48,8 +51,9 @@ def main(args=None):
 
     if args.file:
         from monolizer import Monolizer
-        with Monolizer(file=args.file[0]) as obj:
-            print(obj)
+        with Monolizer(file=args.file[0], debug=args.debug) as obj:
+            if args.debug:
+                obj.debug()
     else:
         from monolizer import FileHandler
 
