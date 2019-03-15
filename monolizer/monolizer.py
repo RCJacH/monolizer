@@ -214,3 +214,16 @@ class Monolizer():
                    self.file.format, True) as f:
                 f.write(data)
             self.file = self.filename
+
+    def debug(self):
+        with open(self.filename+".txt", "w") as f:
+            f.write(str(self) + "\n")
+            f.write('Channel:' + self.channel+ "\n")
+            f.write('flag:' + self.flag+ "\n")
+            f.write('correlated:' + self.correlated+ "\n")
+            f.write('sample:' + self.sample+ "\n")
+            f.write('\nSamples:\n')
+            self._file.seek(0)
+            for samples in self.file.read(always_2d=True):
+                f.write(samples)
+
