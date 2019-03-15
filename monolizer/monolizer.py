@@ -11,6 +11,13 @@ np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
 from soundfile import SEEK_END
 
+import logging
+logging.basicConfig(
+    # handlers=[logging.FileHandler('build_json_list.log', 'w', 'utf-8')],
+    level=logging.DEBUG,
+    format="%(levelname)s:%(asctime)s:%(message)s"
+)
+LOGGER = logging.getLogger(__name__)
 
 class _SampleblockChannelInfo():
     NULL_THRESHOLD = 0.000001 # TODO: get threshold from minimum bit info
@@ -115,6 +122,7 @@ class Monolizer():
         self._file = sf(file)
         if self._file.channels <= 2:
             self._channel = self._check_mono()
+            LOGGER.info('Finished Analyzing channel properties.')
             self._file.seek(0)
 
     filename = property(lambda self: self._filename)
@@ -172,6 +180,8 @@ class Monolizer():
             self._flag = flag
             self._correlated = correlated
             self._sample = sample
+        LOGGER.debug('Analyzing channel info: flag=%s; correlated=%s; sample=%s', 
+                             str(flag), str(correlated), str(sample) )
         if flag == 3 and not correlated:
             return self.STEREO
         if sample and len(sample) == 1 and flag&1:
@@ -186,12 +196,15 @@ class Monolizer():
                     return sample.index(max(sample, key=abs))
                 except IndexError:
                     raise Exception('Sample argument must have at least length of 1.')
+            LOGGER.warning('Could not analyze channel property for file %s.', self.filename)
         return None
 
     def _check_mono(self):
         if self.file:
+            LOGGER.info('Begin analyzing channel properties.')
             flag = correlated = sample = None
             for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
+                # LOGGER.debug('Sampleblock: %s', sampleblock)
                 info = _SampleblockChannelInfo(sampleblock=sampleblock,
                                                 flag=flag,
                                                 correlated=correlated,
@@ -208,12 +221,14 @@ class Monolizer():
 
     def monolize(self):
         if self.file and self.isMono and self.isFakeStereo:
+            LOGGER.info('Monolizing fake stereo file.')
             data = [x[self.channel] for x in self.file.read()]
             self.file.close()
             with sf(self.filename, 'w', self.file.samplerate, 1,
                    self.file.subtype, self.file.endian,
                    self.file.format, True) as f:
                 f.write(data)
+            LOGGER.info('Mono file %s created.', self.filename)
             self.file = self.filename
 
     def debug(self):
