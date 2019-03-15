@@ -92,11 +92,15 @@ class Monolizer():
     EMPTY = -2
     STEREO = -1
 
-    def __init__(self, file=None, blocksize=1024):
+    def __init__(self, file=None, blocksize=1024, debug=False):
         self.blocksize = blocksize
         self._file = None
         self._filename = file
         self._channel = None
+        self._debug = debug
+        self._flag = None
+        self._correlated = None
+        self._sample = None
         if file is not None:
             try:
                 self.file = file
@@ -117,6 +121,12 @@ class Monolizer():
     channel = property(lambda self: self._channel)
 
     channels = property(lambda self: self._file.channels if self.file else 0)
+
+    flag = property(lambda self: self._flag)
+
+    correlated = property(lambda self: self._correlated)
+
+    sample = property(lambda self: self._sample)
 
     isMono = property(lambda self: self.channel == 1 or self.channel == 0)
 
@@ -171,6 +181,10 @@ class Monolizer():
                     return sample.index(max(sample, key=abs))
                 except IndexError:
                     raise Exception('Sample argument must have at least length of 1.')
+        if self._debug:
+            self._flag = flag
+            self._correlated = correlated
+            self._sample = sample
         return None
 
     def _check_mono(self):
