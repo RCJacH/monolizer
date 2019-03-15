@@ -9,6 +9,7 @@ of the file, with methods to combine stereo channels into mono channel.
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore')
 from soundfile import SoundFile as sf
+from soundfile import SEEK_END
 
 
 class _SampleblockChannelInfo():
@@ -167,6 +168,10 @@ class Monolizer():
         L * ratio == R; # Channel = R if ratio > 1 else L
         L * ratio != R; # Stereo
         """
+        if self._debug:
+            self._flag = flag
+            self._correlated = correlated
+            self._sample = sample
         if flag == 3 and not correlated:
             return self.STEREO
         if sample and len(sample) == 1 and flag&1:
@@ -181,10 +186,6 @@ class Monolizer():
                     return sample.index(max(sample, key=abs))
                 except IndexError:
                     raise Exception('Sample argument must have at least length of 1.')
-        if self._debug:
-            self._flag = flag
-            self._correlated = correlated
-            self._sample = sample
         return None
 
     def _check_mono(self):
@@ -218,12 +219,20 @@ class Monolizer():
     def debug(self):
         with open(self.filename+".txt", "w") as f:
             f.write(str(self) + "\n")
-            f.write('Channel:' + self.channel+ "\n")
-            f.write('flag:' + self.flag+ "\n")
-            f.write('correlated:' + self.correlated+ "\n")
-            f.write('sample:' + self.sample+ "\n")
+            f.write('Channel:' + str(self.channel)+ "\n")
+            f.write('Type:' + self._file.format + " " + self._file.subtype_info + "\n")
+            f.write('flag:' + str(self.flag)+ "\n")
+            f.write('correlated:' + str(self.correlated)+ "\n")
+            f.write('sample:' + str(self.sample)+ "\n")
             f.write('\nSamples:\n')
+            l = self._file.seek(0, SEEK_END)
+            i = 0
             self._file.seek(0)
-            for samples in self.file.read(always_2d=True):
-                f.write(samples)
+            while i < l:
+                f.write(str(self._file.read(frames=1024, always_2d=True)) + "\n...\n")
+                i += 1024
+                if i < l:
+                    self._file.seek(i)
+                    i += 1024
+            self._file.seek(0)
 
