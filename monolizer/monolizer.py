@@ -76,7 +76,7 @@ class _SampleblockChannelInfo():
 
     def _get_sample_from_sampleblock(self, sampleblock):
         sample = self.sample
-        if not sample or not self._is_sample_stereo(sample):
+        if not sample or sample == [] or not self._is_sample_stereo(sample):
             sample = self._get_valid_sample(sampleblock)
         return sample
 
@@ -85,9 +85,11 @@ class _SampleblockChannelInfo():
 
     def _get_valid_sample(self, sampleblock):
         try:
-            return next((self._validate_sample(samples) for samples in sampleblock if 0 not in samples))
+            return next((self._validate_sample(samples)
+                         for samples in sampleblock 
+                         if (0 not in samples and samples != [])))
         except StopIteration:
-            return []
+            return self.sample
     
     def _validate_sample(self, samples):
         try:

@@ -90,6 +90,11 @@ class Test_SampleblockChannelInfo(object):
                                    [0.99996948, 0.99804688],
                                    [0.99996948, 0.99609375]
                                    ]) == [0.99996948, 0.99804688]
+        obj.sample = [0.1, 0.2]
+        assert obj._get_sample_from_sampleblock([[0.2, 0.5,]]) == [0.1, 0.2]
+        obj.sample = [0.1, 0.1]
+        assert obj._get_sample_from_sampleblock([[0.2, 0.5,]]) == [0.2, 0.5]
+        assert obj._get_sample_from_sampleblock([[]]) == [0.1, 0.1]
         obj.reset_sample()
 
     def test_is_sample_stereo(self, obj):
