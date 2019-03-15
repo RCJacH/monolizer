@@ -102,7 +102,8 @@ class Monolizer():
     EMPTY = -2
     STEREO = -1
 
-    def __init__(self, file=None, blocksize=1024, debug=False):
+    def __init__(self, file=None, blocksize=None, debug=False):
+        LOGGER.info('Initiating file: %s', file)
         self.blocksize = blocksize
         self._file = None
         self._filename = file
@@ -122,9 +123,11 @@ class Monolizer():
     @file.setter
     def file(self, file):
         self._file = sf(file)
+        if not self.blocksize:
+            self.blocksize = self._file.samplerate
         if self._file.channels <= 2:
             self._channel = self._check_mono()
-            LOGGER.info('Finished Analyzing channel properties.')
+            LOGGER.info('Finished Analyzing channel properties: channel == %s; empty == %s; fake == %s;', self.channel, self.isEmpty, self.isFakeStereo)
             self._file.seek(0)
 
     filename = property(lambda self: self._filename)
@@ -244,12 +247,13 @@ class Monolizer():
             f.write('\nSamples:\n')
             l = self._file.seek(0, SEEK_END)
             i = 0
+            sr = self._file.samplerate
             self._file.seek(0)
             while i < l:
-                f.write(str(self._file.read(frames=1024, always_2d=True)) + "\n...\n")
-                i += 1024
+                f.write(str(self._file.read(frames=sr, always_2d=True)) + "\n...\n")
+                i += sr
                 if i < l:
                     self._file.seek(i)
-                    i += 1024
+                    i += sr
             self._file.seek(0)
 
