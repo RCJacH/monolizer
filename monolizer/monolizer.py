@@ -14,13 +14,13 @@ from soundfile import SEEK_END
 import logging
 logging.basicConfig(
     # handlers=[logging.FileHandler('build_json_list.log', 'w', 'utf-8')],
-    level=logging.DEBUG,
+    # level=logging.INFO,
     format="%(levelname)s:%(asctime)s:%(message)s"
 )
 LOGGER = logging.getLogger(__name__)
 
 class _SampleblockChannelInfo():
-    NULL_THRESHOLD = 0.000001 # TODO: get threshold from minimum bit info
+    NULL_THRESHOLD = 0.00001
 
     def __init__(self, flag=0, correlated=None, sample=[], sampleblock=None):
         self.flag = flag != None and flag
@@ -76,7 +76,7 @@ class _SampleblockChannelInfo():
 
     def _get_sample_from_sampleblock(self, sampleblock):
         sample = self.sample
-        if not sample or sample == [] or not self._is_sample_stereo(sample):
+        if not sample or len(sample) == 0 or not self._is_sample_stereo(sample):
             sample = self._get_valid_sample(sampleblock)
         return sample
 
@@ -87,7 +87,7 @@ class _SampleblockChannelInfo():
         try:
             return next((self._validate_sample(samples)
                          for samples in sampleblock 
-                         if (0 not in samples and samples != [])))
+                         if (0 not in samples and len(samples) > 0)))
         except StopIteration:
             return self.sample
     
@@ -101,6 +101,7 @@ class _SampleblockChannelInfo():
 class Monolizer():
     EMPTY = -2
     STEREO = -1
+    NULL_THRESHOLD = 0.00001
 
     def __init__(self, file=None, blocksize=None, debug=False):
         LOGGER.info('Initiating file: %s', file)
@@ -192,7 +193,7 @@ class Monolizer():
         if sample and len(sample) == 1 and flag&1:
             return 0
         if eof:
-            if flag == 0:
+            if not flag or flag == 0:
                 return self.EMPTY
             elif flag < 3:
                 return flag - 1
@@ -210,16 +211,17 @@ class Monolizer():
             flag = correlated = sample = None
             for sampleblock in self.file.blocks(blocksize=self.blocksize, always_2d=True):
                 # LOGGER.debug('Sampleblock: %s', sampleblock)
-                info = _SampleblockChannelInfo(sampleblock=sampleblock,
-                                                flag=flag,
-                                                correlated=correlated,
-                                                sample=sample)
-                flag = info.flag
-                correlated = info.isCorrelated
-                sample = info.sample
-                channel = self._identify_channel(flag, correlated, sample)
-                if channel is not None:
-                    return channel
+                if (sampleblock.flatten() > self.NULL_THRESHOLD).any():
+                    info = _SampleblockChannelInfo(sampleblock=sampleblock,
+                                                    flag=flag,
+                                                    correlated=correlated,
+                                                    sample=sample)
+                    flag = info.flag
+                    correlated = info.isCorrelated
+                    sample = info.sample
+                    channel = self._identify_channel(flag, correlated, sample)
+                    if channel is not None:
+                        return channel
             return self._identify_channel(flag, correlated, sample, eof=True)
         else:
             return None
