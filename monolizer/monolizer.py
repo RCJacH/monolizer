@@ -20,12 +20,11 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 class _SampleblockChannelInfo():
-    NULL_THRESHOLD = 0.00001
-
-    def __init__(self, flag=0, correlated=None, sample=[], sampleblock=None):
+    def __init__(self, flag=0, correlated=None, sample=[], sampleblock=None, threshold=0.00001):
         self.flag = flag != None and flag
         self.isCorrelated = correlated
         self.sample = sample != None and sample
+        self.NULL_THRESHOLD = threshold
         if sampleblock is not None:
             self.set_info(sampleblock)
 
@@ -101,9 +100,8 @@ class _SampleblockChannelInfo():
 class Monolizer():
     EMPTY = -2
     STEREO = -1
-    NULL_THRESHOLD = 0.00001
 
-    def __init__(self, file=None, blocksize=None, debug=False):
+    def __init__(self, file=None, blocksize=None, debug=False, threshold=0.00001):
         LOGGER.info('Initiating file: %s', file)
         self.blocksize = blocksize
         self._file = None
@@ -113,6 +111,7 @@ class Monolizer():
         self._flag = None
         self._correlated = None
         self._sample = None
+        self.NULL_THRESHOLD = threshold
         if file is not None:
             try:
                 self.file = file
@@ -215,7 +214,8 @@ class Monolizer():
                     info = _SampleblockChannelInfo(sampleblock=sampleblock,
                                                     flag=flag,
                                                     correlated=correlated,
-                                                    sample=sample)
+                                                    sample=sample,
+                                                    threshold=self.NULL_THRESHOLD)
                     flag = info.flag
                     correlated = info.isCorrelated
                     sample = info.sample
