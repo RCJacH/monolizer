@@ -61,7 +61,7 @@ def main(args=None):
         if len(folder.files) == 0:
             print('No audio files found in current directory.')
         else:
-            if args.auto or args.delete or args.monolize:
+            if args.auto or args.remove or args.monolize:
                 if args.auto or (not args.overwrite and args.backup):
                     folder.backup(folder=args.backup[0], newfolder=args.inc)
                     print('Backed up all original files to {} subfolder'.format(args.backup[0]))
