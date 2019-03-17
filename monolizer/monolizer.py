@@ -66,7 +66,7 @@ class _SampleblockChannelInfo():
         return np.nan_to_num(np.divide(b, a, dtype='float')).flatten()
 
     def _is_ratio_correlated(self, ratios):
-        return (np.subtract(*ratios).flat < self.NULL_THRESHOLD).all()
+        return (np.absolute(np.subtract(*ratios)).flat < self.NULL_THRESHOLD).all()
 
     def set_sample(self, sampleblock):
         self.sample = self._get_sample_from_sampleblock(sampleblock)

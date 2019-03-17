@@ -57,6 +57,14 @@ class Test_SampleblockChannelInfo(object):
                                         [1.0148026 , 1.01443943, 1.01423377], 
                                         [1.0148026 , 1.01443943, 1.01423382]
                                         ]) == True
+        assert obj._is_ratio_correlated([
+                                        [1.0, 1.0],
+                                        [1.0, 1.000009],
+                                        ]) == True
+        assert obj._is_ratio_correlated([
+                                        [1, 2],
+                                        [1, 2.00001]
+                                        ]) == False
 
     def test_is_sampleblock_correlated(self, obj):
         assert obj._is_sampleblock_correlated([[0.5, 0.5]] * 3) == True
