@@ -37,9 +37,15 @@ def parser(args):
                         action='store_true',
                         help='Make permanent change to the original file \
                         without backing up.')
+    parser.add_argument('-t', '--threshold',
+                        nargs=1, default=[-96],
+                        help='Threshold in float or dBFS to filter noisefloor.')
     # parser.add_argument('-s', '--subfolder',
     #                     action='store_true',
     #                     help='Include files in sub-folder during conversion.')
+    parser.add_argument('--forced',
+                        action='store_true',
+                        help='Force remove or monolize file(s) without analyzing channel info.')
     args = parser.parse_args()
     return args
 
@@ -49,15 +55,19 @@ def main(args=None):
         args = sys.argv[1:]
     args = parser(args)
 
+    threshold=int(args.threshold[0])
+    if threshold < 0:
+        threshold = 2 ** (threshold / 6)
+
     if args.file:
         from monolizer import Monolizer
-        with Monolizer(file=args.file[0], debug=args.debug) as obj:
+        with Monolizer(file=args.file[0], debug=args.debug, threshold=threshold) as obj:
             if args.debug:
                 obj.debug()
     else:
         from monolizer import FileHandler
 
-        folder = FileHandler(folder=os.getcwd())
+        folder = FileHandler(folder=os.getcwd(), threshold=threshold)
         if len(folder.files) == 0:
             print('No audio files found in current directory.')
         else:

@@ -33,8 +33,9 @@ Potential additions supported by PySoundFile library
 '''
 class FileHandler():
 
-    def __init__(self, folder=None):
+    def __init__(self, folder=None, threshold=None):
         self._folder = None
+        self.NULL_THRESHOLD=threshold
         if folder and os.path.exists(folder):
             self.folder = folder
 
@@ -57,7 +58,9 @@ class FileHandler():
     @folder.setter
     def folder(self, folder):
         self._folder = folder
-        self.files = [Monolizer(os.path.join(folder, f)) for f in self._list_audio_files(folder)]
+        self.files = [Monolizer(os.path.join(folder, f),
+                        threshold=self.NULL_THRESHOLD,
+                        ) for f in self._list_audio_files(folder)]
 
     filenames = property(lambda self: [f.filename for f in self.files])
 
