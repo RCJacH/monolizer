@@ -64,6 +64,12 @@ def main(args=None):
         with Monolizer(file=args.file[0], debug=args.debug, threshold=threshold) as obj:
             if args.debug:
                 obj.debug()
+            if args.monolize:
+                obj.monolize(channel=int(args.forced))
+            if args.remove:
+                obj.remove(forced=int(args.forced))
+            else:
+                print(obj)
     else:
         from monolizer import FileHandler
 

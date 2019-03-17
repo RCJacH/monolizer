@@ -226,8 +226,9 @@ class Monolizer():
         else:
             return None
 
-    def monolize(self):
-        if self.file and self.isMono and self.isFakeStereo:
+    def monolize(self, channel=None):
+        if self.file and (channel or (self.isMono and self.isFakeStereo)):
+            channel = channel or self.channel
             LOGGER.info('Monolizing fake stereo file.')
             data = [x[self.channel] for x in self.file.read()]
             self.file.close()
@@ -237,6 +238,13 @@ class Monolizer():
                 f.write(data)
             LOGGER.info('Mono file %s created.', self.filename)
             self.file = self.filename
+
+    def remove(self, forced=False):
+        if self.file and (forced or self.isEmpty):
+            from os import remove
+            self.file.close()
+            remove(self.filename)
+            del(self)
 
     def debug(self):
         with open(self.filename+".txt", "w") as f:

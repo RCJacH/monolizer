@@ -89,8 +89,7 @@ class FileHandler():
         for file in self.empty_files:
             filename = file.filename
             filenames.append(filename)
-            file.close()
-            os.remove(filename)
+            file.remove()
             self.files.remove(file)
         return filenames
 
